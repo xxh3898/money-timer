@@ -10,9 +10,17 @@ export const DEFAULT_SETTINGS = {
   workDays: [1, 2, 3, 4, 5],
   workStartTime: "09:00",
   workEndTime: "18:00",
+  breaks: [{ startTime: "12:00", endTime: "13:00", enabled: false }],
+  privacyMode: false,
+  theme: "light",
 };
 
 const wonFormatter = new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 });
+export const DEFAULT_GOALS = [
+  { id: "coffee", name: "커피", amount: 5000, enabled: true },
+  { id: "lunch", name: "점심", amount: 12000, enabled: true },
+];
+
 const safe = (value) => (Number.isFinite(value) ? Math.max(0, value) : 0);
 const secondsBetween = (start, end) => safe((new Date(end).getTime() - new Date(start).getTime()) / 1000);
 
@@ -109,14 +117,48 @@ export function isInWorkTime(date, settings) {
   const start = parseTimeToMinutes(settings.workStartTime);
   const end = parseTimeToMinutes(settings.workEndTime);
   const current = target.getHours() * 60 + target.getMinutes() + target.getSeconds() / 60;
-  return start !== null && end !== null && start < end && current >= start && current < end;
+  if (!(start !== null && end !== null && start < end && current >= start && current < end)) return false;
+  return !getEnabledBreaks(settings).some((item) => {
+    const breakStart = parseTimeToMinutes(item.startTime);
+    const breakEnd = parseTimeToMinutes(item.endTime);
+    return breakStart !== null && breakEnd !== null && current >= breakStart && current < breakEnd;
+  });
+}
+
+export function getEnabledBreaks(settings) {
+  return Array.isArray(settings?.breaks)
+    ? settings.breaks.filter((item) => item?.enabled && parseTimeToMinutes(item.startTime) !== null && parseTimeToMinutes(item.endTime) !== null && parseTimeToMinutes(item.startTime) < parseTimeToMinutes(item.endTime))
+    : [];
+}
+
+function getBreakSecondsForDay(segmentStart, segmentEnd, day, settings) {
+  return getEnabledBreaks(settings).reduce((sum, item) => {
+    const start = parseTimeToMinutes(item.startTime);
+    const end = parseTimeToMinutes(item.endTime);
+    const breakStart = new Date(day);
+    breakStart.setMinutes(start, 0, 0);
+    const breakEnd = new Date(day);
+    breakEnd.setMinutes(end, 0, 0);
+    const overlapStart = new Date(Math.max(segmentStart.getTime(), breakStart.getTime()));
+    const overlapEnd = new Date(Math.min(segmentEnd.getTime(), breakEnd.getTime()));
+    return sum + secondsBetween(overlapStart, overlapEnd);
+  }, 0);
 }
 
 export function getEligibleSeconds(start, end, settings) {
   const from = new Date(start);
   const to = new Date(end);
   if (to <= from) return 0;
-  if (settings.earningMode !== "worktime") return secondsBetween(from, to);
+  if (settings.earningMode !== "worktime") {
+    let total = secondsBetween(from, to);
+    const cursor = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+    const finalDay = new Date(to.getFullYear(), to.getMonth(), to.getDate());
+    while (cursor <= finalDay) {
+      total -= getBreakSecondsForDay(from, to, cursor, settings);
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return safe(total);
+  }
 
   const workStart = parseTimeToMinutes(settings.workStartTime);
   const workEnd = parseTimeToMinutes(settings.workEndTime);
@@ -134,7 +176,7 @@ export function getEligibleSeconds(start, end, settings) {
       dayEnd.setMinutes(workEnd, 0, 0);
       const segmentStart = new Date(Math.max(from.getTime(), dayStart.getTime()));
       const segmentEnd = new Date(Math.min(to.getTime(), dayEnd.getTime()));
-      total += secondsBetween(segmentStart, segmentEnd);
+      total += Math.max(0, secondsBetween(segmentStart, segmentEnd) - getBreakSecondsForDay(segmentStart, segmentEnd, cursor, settings));
     }
     cursor.setDate(cursor.getDate() + 1);
   }
@@ -173,11 +215,25 @@ export function calculateEarnings(now, settings = DEFAULT_SETTINGS) {
   return {
     earned: safe(earned),
     perSecond: safe(perSecond),
+    averagePerSecond: safe(settings.calculationType === "hourly" ? hourlyNetWage / 3600 : (totalEligibleSeconds > 0 ? cyclePay / totalEligibleSeconds : 0)),
+    totalEligibleSeconds: safe(totalEligibleSeconds),
     todayEarned: safe(todayEarned),
     cycleEarned: safe(earned),
     remainingText: formatRemainingTime(cycleEnd.getTime() - current.getTime()),
     progress: totalCalendarSeconds > 0 ? clamp((elapsedCalendarSeconds / totalCalendarSeconds) * 100, 0, 100) : 0,
     cycleStart,
     cycleEnd,
+  };
+}
+
+export function calculateGoalProgress(goal, earned, perSecond) {
+  const amount = safe(Number(goal?.amount));
+  const currentEarned = safe(Number(earned));
+  const currentPerSecond = safe(Number(perSecond));
+  const remainingAmount = safe(amount - currentEarned);
+  return {
+    progress: amount > 0 ? clamp((currentEarned / amount) * 100, 0, 100) : 0,
+    remainingAmount,
+    remainingSeconds: currentPerSecond > 0 ? safe(remainingAmount / currentPerSecond) : 0,
   };
 }
