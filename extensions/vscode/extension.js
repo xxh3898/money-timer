@@ -33,6 +33,9 @@ function sanitizeSettings(settings) {
     : defaults.workDays;
   const workStartTime = core.isValidTimeString(merged.workStartTime) ? merged.workStartTime : defaults.workStartTime;
   const workEndTime = core.isValidTimeString(merged.workEndTime) ? merged.workEndTime : defaults.workEndTime;
+  const workStartMinutes = core.parseTimeToMinutes(workStartTime);
+  const workEndMinutes = core.parseTimeToMinutes(workEndTime);
+  const numericPayday = Number(merged.payday);
 
   return {
     calculationType: ["annual", "monthly", "hourly"].includes(merged.calculationType) ? merged.calculationType : defaults.calculationType,
@@ -40,12 +43,12 @@ function sanitizeSettings(settings) {
     monthlySalary: isValidNumber(merged.monthlySalary) ? Number(merged.monthlySalary) : defaults.monthlySalary,
     hourlyWage: isValidNumber(merged.hourlyWage) ? Number(merged.hourlyWage) : defaults.hourlyWage,
     taxMode: ["net", "gross"].includes(merged.taxMode) ? merged.taxMode : defaults.taxMode,
-    payday: Math.min(Math.max(Math.trunc(Number(merged.payday) || defaults.payday), 1), 31),
+    payday: Number.isFinite(numericPayday) ? Math.min(Math.max(Math.trunc(numericPayday), 0), 31) : defaults.payday,
     paydayTime: core.isValidTimeString(merged.paydayTime) ? merged.paydayTime : defaults.paydayTime,
     earningMode: ["always", "worktime"].includes(merged.earningMode) ? merged.earningMode : defaults.earningMode,
-    workDays: workDays.length ? workDays : defaults.workDays,
+    workDays,
     workStartTime,
-    workEndTime: core.parseTimeToMinutes(workStartTime) < core.parseTimeToMinutes(workEndTime) ? workEndTime : defaults.workEndTime,
+    workEndTime: workStartMinutes !== null && workEndMinutes !== null && workStartMinutes < workEndMinutes ? workEndTime : defaults.workEndTime,
   };
 }
 
@@ -128,9 +131,9 @@ async function configure() {
     title: "근무 요일",
     value: next.workDays.join(","),
     prompt: "0(일)~6(토)을 쉼표로 입력하세요. 예: 1,2,3,4,5",
-    validateInput: (input) => input.split(",").every((day) => Number.isInteger(Number(day.trim())) && Number(day.trim()) >= 0 && Number(day.trim()) <= 6) ? undefined : "0~6 사이 숫자를 쉼표로 입력하세요.",
+    validateInput: (input) => input.trim() === "" || input.split(",").every((day) => Number.isInteger(Number(day.trim())) && Number(day.trim()) >= 0 && Number(day.trim()) <= 6) ? undefined : "0~6 사이 숫자를 쉼표로 입력하세요.",
   });
-  if (workDays !== undefined) next.workDays = workDays.split(",").map((day) => Number(day.trim()));
+  if (workDays !== undefined) next.workDays = workDays.trim() === "" ? [] : workDays.split(",").map((day) => Number(day.trim()));
   next.workStartTime = await promptTime("근무 시작 시간", next.workStartTime);
   next.workEndTime = await promptTime("근무 종료 시간", next.workEndTime);
   await saveSettings(next);

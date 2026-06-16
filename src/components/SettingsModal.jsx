@@ -15,14 +15,16 @@ export default function SettingsModal({ settings, onClose, onSave }) {
   const updateMoney = (key, value) => update(key, parseInputNumber(value));
   const toggleDay = (day) => setForm((prev) => ({
     ...prev,
-    workDays: prev.workDays.includes(day) ? prev.workDays.filter((item) => item !== day) : [...prev.workDays, day],
+    workDays: (Array.isArray(prev.workDays) ? prev.workDays : []).includes(day)
+      ? prev.workDays.filter((item) => item !== day)
+      : [...(Array.isArray(prev.workDays) ? prev.workDays : []), day],
   }));
   const updateBreak = (index, key, value) => setForm((prev) => ({
     ...prev,
-    breaks: prev.breaks.map((item, itemIndex) => itemIndex === index ? { ...item, [key]: value } : item),
+    breaks: (Array.isArray(prev.breaks) ? prev.breaks : []).map((item, itemIndex) => itemIndex === index ? { ...item, [key]: value } : item),
   }));
-  const addBreak = () => setForm((prev) => ({ ...prev, breaks: [...prev.breaks, { startTime: "12:00", endTime: "13:00", enabled: false }] }));
-  const removeBreak = (index) => setForm((prev) => ({ ...prev, breaks: prev.breaks.length > 1 ? prev.breaks.filter((_, itemIndex) => itemIndex !== index) : prev.breaks }));
+  const addBreak = () => setForm((prev) => ({ ...prev, breaks: [...(Array.isArray(prev.breaks) ? prev.breaks : []), { startTime: "", endTime: "", enabled: false }] }));
+  const removeBreak = (index) => setForm((prev) => ({ ...prev, breaks: (Array.isArray(prev.breaks) ? prev.breaks : []).filter((_, itemIndex) => itemIndex !== index) }));
 
   const validate = () => {
     const amountKey = { annual: "annualSalary", monthly: "monthlySalary", hourly: "hourlyWage" }[form.calculationType];
@@ -39,7 +41,7 @@ export default function SettingsModal({ settings, onClose, onSave }) {
       }
     }
     if (form.earningMode === "worktime") {
-      if (!form.workDays.length) return "근무 요일을 하나 이상 선택해 주세요.";
+      if (!Array.isArray(form.workDays) || !form.workDays.length) return "근무 요일을 하나 이상 선택해 주세요.";
       if (!isValidTimeString(form.workStartTime) || !isValidTimeString(form.workEndTime)) return "근무 시간은 HH:mm 형식이어야 합니다.";
       if (parseTimeToMinutes(form.workStartTime) >= parseTimeToMinutes(form.workEndTime)) return "근무 시작 시간은 종료 시간보다 빨라야 합니다.";
     }
@@ -109,7 +111,7 @@ export default function SettingsModal({ settings, onClose, onSave }) {
         </fieldset>
 
         <fieldset className={form.earningMode === "worktime" ? "" : "muted-section"}><legend>근무시간 설정</legend>
-          <div className="day-row">{days.map(([value, label]) => <label key={value}><input type="checkbox" checked={form.workDays.includes(value)} onChange={() => toggleDay(value)} />{label}</label>)}</div>
+          <div className="day-row">{days.map(([value, label]) => <label key={value}><input type="checkbox" checked={(Array.isArray(form.workDays) ? form.workDays : []).includes(value)} onChange={() => toggleDay(value)} />{label}</label>)}</div>
           <div className="form-grid two">
             <label>근무 시작<input type="time" value={form.workStartTime} onChange={(e) => update("workStartTime", e.target.value)} /></label>
             <label>근무 종료<input type="time" value={form.workEndTime} onChange={(e) => update("workEndTime", e.target.value)} /></label>

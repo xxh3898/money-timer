@@ -1,25 +1,22 @@
 export const DEFAULT_SETTINGS = {
-  calculationType: "annual",
-  annualSalary: 30000000,
-  monthlySalary: 2500000,
-  hourlyWage: 10000,
-  taxMode: "net",
-  payday: 25,
-  paydayTime: "09:00",
-  earningMode: "always",
-  workDays: [1, 2, 3, 4, 5],
-  workStartTime: "09:00",
-  workEndTime: "18:00",
-  breaks: [{ startTime: "12:00", endTime: "13:00", enabled: false }],
+  calculationType: "",
+  annualSalary: 0,
+  monthlySalary: 0,
+  hourlyWage: 0,
+  taxMode: "",
+  payday: 0,
+  paydayTime: "",
+  earningMode: "",
+  workDays: [],
+  workStartTime: "",
+  workEndTime: "",
+  breaks: [],
   privacyMode: false,
   theme: "light",
 };
 
 const wonFormatter = new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 });
-export const DEFAULT_GOALS = [
-  { id: "coffee", name: "커피", amount: 5000, enabled: true },
-  { id: "lunch", name: "점심", amount: 12000, enabled: true },
-];
+export const DEFAULT_GOALS = [];
 
 const safe = (value) => (Number.isFinite(value) ? Math.max(0, value) : 0);
 const secondsBetween = (start, end) => safe((new Date(end).getTime() - new Date(start).getTime()) / 1000);
@@ -48,8 +45,9 @@ export function getLastDayOfMonth(year, month) {
 }
 
 export function getPayDateForMonth(year, month, payday, paydayTime) {
-  const [hours, minutes] = isValidTimeString(paydayTime) ? paydayTime.split(":").map(Number) : [9, 0];
-  const safePayday = clamp(Number(payday) || DEFAULT_SETTINGS.payday, 1, 31);
+  const [hours, minutes] = isValidTimeString(paydayTime) ? paydayTime.split(":").map(Number) : [0, 0];
+  const numericPayday = Number(payday);
+  const safePayday = Number.isFinite(numericPayday) && numericPayday >= 1 ? clamp(Math.trunc(numericPayday), 1, 31) : 1;
   const day = Math.min(safePayday, getLastDayOfMonth(year, month));
   return new Date(year, month, day, hours, minutes, 0, 0);
 }

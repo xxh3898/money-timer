@@ -8,10 +8,10 @@ const numberOrDefault = (value, fallback) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 const sanitizeBreaks = (breaks) => {
-  const items = Array.isArray(breaks) && breaks.length ? breaks : DEFAULT_SETTINGS.breaks;
+  const items = Array.isArray(breaks) ? breaks : DEFAULT_SETTINGS.breaks;
   return items.map((item) => ({
-    startTime: isValidTimeString(item?.startTime) ? item.startTime : "12:00",
-    endTime: isValidTimeString(item?.endTime) && parseTimeToMinutes(item?.startTime) < parseTimeToMinutes(item?.endTime) ? item.endTime : "13:00",
+    startTime: isValidTimeString(item?.startTime) ? item.startTime : "",
+    endTime: isValidTimeString(item?.endTime) && parseTimeToMinutes(item?.startTime) !== null && parseTimeToMinutes(item?.startTime) < parseTimeToMinutes(item?.endTime) ? item.endTime : "",
     enabled: Boolean(item?.enabled),
   }));
 };
@@ -31,6 +31,8 @@ export function sanitizeSettings(settings) {
     : DEFAULT_SETTINGS.workDays;
   const workStartTime = isValidTimeString(merged.workStartTime) ? merged.workStartTime : DEFAULT_SETTINGS.workStartTime;
   const workEndTime = isValidTimeString(merged.workEndTime) ? merged.workEndTime : DEFAULT_SETTINGS.workEndTime;
+  const workStartMinutes = parseTimeToMinutes(workStartTime);
+  const workEndMinutes = parseTimeToMinutes(workEndTime);
 
   return {
     calculationType,
@@ -38,12 +40,12 @@ export function sanitizeSettings(settings) {
     monthlySalary: Math.max(0, numberOrDefault(merged.monthlySalary, DEFAULT_SETTINGS.monthlySalary)),
     hourlyWage: Math.max(0, numberOrDefault(merged.hourlyWage, DEFAULT_SETTINGS.hourlyWage)),
     taxMode,
-    payday: Math.min(Math.max(Math.trunc(numberOrDefault(merged.payday, DEFAULT_SETTINGS.payday)), 1), 31),
+    payday: Math.min(Math.max(Math.trunc(numberOrDefault(merged.payday, DEFAULT_SETTINGS.payday)), 0), 31),
     paydayTime: isValidTimeString(merged.paydayTime) ? merged.paydayTime : DEFAULT_SETTINGS.paydayTime,
     earningMode,
     workDays,
     workStartTime,
-    workEndTime: parseTimeToMinutes(workStartTime) < parseTimeToMinutes(workEndTime) ? workEndTime : DEFAULT_SETTINGS.workEndTime,
+    workEndTime: workStartMinutes !== null && workEndMinutes !== null && workStartMinutes < workEndMinutes ? workEndTime : DEFAULT_SETTINGS.workEndTime,
     breaks: sanitizeBreaks(merged.breaks),
     privacyMode: Boolean(merged.privacyMode),
     theme,
@@ -67,7 +69,7 @@ export function saveSettings(settings) {
 }
 
 export function sanitizeGoals(goals) {
-  const items = Array.isArray(goals) && goals.length ? goals : DEFAULT_GOALS;
+  const items = Array.isArray(goals) ? goals : DEFAULT_GOALS;
   return items.map((goal, index) => ({
     id: String(goal?.id || `goal-${index}-${Date.now()}`),
     name: String(goal?.name || "목표"),
