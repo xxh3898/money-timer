@@ -1,0 +1,49 @@
+:root { font-family: Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #172033; background: #f4f7fb; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; }
+button, input { font: inherit; }
+.app-shell { width: min(1080px, 100%); margin: 0 auto; padding: 32px 20px 56px; }
+.header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 28px; }
+.eyebrow { margin: 0 0 6px; color: #5d7cab; font-size: 13px; font-weight: 700; }
+h1 { margin: 0; font-size: clamp(30px, 6vw, 48px); letter-spacing: -0.04em; }
+.icon-button, .ghost-button { border: 0; background: #fff; color: #1e63ff; border-radius: 18px; box-shadow: 0 12px 28px rgba(26, 50, 92, 0.08); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.icon-button { width: 52px; height: 52px; }
+.ghost-button { width: 38px; height: 38px; box-shadow: none; background: #f2f6ff; }
+.money-card, .stat-card, .progress-card, .modal { background: rgba(255, 255, 255, 0.94); border-radius: 30px; box-shadow: 0 24px 60px rgba(29, 55, 103, 0.11); }
+.money-card { padding: clamp(28px, 6vw, 56px); margin-bottom: 20px; overflow: hidden; position: relative; }
+.money-card::after { content: ""; position: absolute; inset: auto -60px -100px auto; width: 260px; height: 260px; background: radial-gradient(circle, rgba(38, 119, 255, 0.22), transparent 65%); }
+.money-card span, .stat-card span, .progress-head span { color: #6e7f99; font-weight: 700; }
+.money-card strong { display: block; margin: 12px 0; font-size: clamp(44px, 10vw, 86px); line-height: 1; letter-spacing: -0.06em; color: #111827; transition: color 0.2s ease, transform 0.2s ease; }
+.money-card p { margin: 0; color: #789; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 20px 0; }
+.stat-card { min-height: 132px; padding: 22px; display: flex; flex-direction: column; justify-content: space-between; }
+.stat-card strong { font-size: clamp(20px, 3vw, 30px); letter-spacing: -0.04em; word-break: keep-all; }
+.stat-card-blue { background: linear-gradient(135deg, #1d65ff, #55a8ff); color: white; }
+.stat-card-blue span { color: rgba(255,255,255,.78); }
+.progress-card { padding: 24px; }
+.progress-head { display: flex; justify-content: space-between; margin-bottom: 14px; }
+.progress-head strong { color: #1d65ff; }
+.progress-track { height: 12px; border-radius: 999px; background: #e8eef8; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #1d65ff, #65c7ff); transition: width 0.3s ease; }
+.modal-backdrop { position: fixed; inset: 0; background: rgba(17, 24, 39, 0.45); display: grid; place-items: center; padding: 18px; z-index: 10; }
+.modal { width: min(620px, 100%); max-height: min(86vh, 860px); overflow: auto; padding: 24px; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+h2 { margin: 0; font-size: 28px; }
+fieldset { border: 0; padding: 0; margin: 0 0 20px; }
+legend { font-weight: 800; margin-bottom: 10px; }
+.segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.segmented.vertical { grid-template-columns: 1fr 1fr; }
+.segmented label, .day-row label { padding: 12px 14px; border-radius: 16px; background: #f5f8fd; color: #334155; font-weight: 700; cursor: pointer; }
+.segmented input, .day-row input { margin-right: 8px; accent-color: #1d65ff; }
+.form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.form-grid.two { grid-template-columns: repeat(2, 1fr); }
+.form-grid label { color: #526173; font-size: 14px; font-weight: 800; }
+input { width: 100%; margin-top: 7px; border: 0; outline: 2px solid transparent; background: #f5f8fd; border-radius: 16px; padding: 14px; color: #172033; }
+input:focus { outline-color: #9cc0ff; background: #fff; }
+.hint { margin: 9px 0 0; color: #8491a5; font-size: 13px; }
+.error-box { background: #fff1f2; color: #e11d48; padding: 12px 14px; border-radius: 16px; margin-bottom: 16px; font-weight: 800; }
+.day-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.muted-section { opacity: 0.72; }
+.save-button { position: sticky; bottom: 0; width: 100%; border: 0; border-radius: 18px; padding: 16px; background: #1d65ff; color: #fff; font-weight: 900; cursor: pointer; box-shadow: 0 14px 30px rgba(29, 101, 255, .28); }
+@media (max-width: 860px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .form-grid { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .app-shell { padding: 22px 14px 40px; } .stats-grid, .form-grid.two, .segmented, .segmented.vertical { grid-template-columns: 1fr; } .money-card, .stat-card, .progress-card, .modal { border-radius: 24px; } .money-card strong { font-size: 44px; } }
