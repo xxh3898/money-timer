@@ -76,6 +76,10 @@ export function formatKRW(amount) {
   return wonFormatter.format(Math.round(safe(amount)));
 }
 
+export function formatProgress(value) {
+  return `${safe(value).toLocaleString("ko-KR", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}%`;
+}
+
 export function formatKRWPerSecond(amount) {
   return `초당 ₩${safe(amount).toLocaleString("ko-KR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }

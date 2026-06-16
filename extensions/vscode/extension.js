@@ -69,7 +69,7 @@ function buildTooltip(result) {
     `초당 버는 돈: ${core.formatKRWPerSecond(result.perSecond)}`,
     `오늘 번 돈: ${core.formatKRW(result.todayEarned)}`,
     `다음 급여일까지 남은 시간: ${result.remainingText}`,
-    `급여 주기 진행률: ${result.progress.toFixed(1)}%`,
+    `급여 주기 진행률: ${core.formatProgress(result.progress)}`,
   ].join("\n");
 }
 
@@ -152,7 +152,7 @@ function showDetails() {
     `초당 버는 돈: ${core.formatKRWPerSecond(result.perSecond)}`,
     `오늘 번 돈: ${core.formatKRW(result.todayEarned)}`,
     `다음 급여일까지 남은 시간: ${result.remainingText}`,
-    `급여 주기 진행률: ${result.progress.toFixed(1)}%`,
+    `급여 주기 진행률: ${core.formatProgress(result.progress)}`,
     `근무 요일: ${settings.workDays.map((day) => DAY_NAMES[day]).join(", ")}`,
   ], { title: "Money Timer Details" });
 }
