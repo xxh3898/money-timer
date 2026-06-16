@@ -2,6 +2,7 @@ export {
   calculateEarnings,
   formatKRW,
   formatKRWPerSecond,
+  formatProgress,
   getCyclePay,
   getEligibleSeconds,
   getNetAmount,
