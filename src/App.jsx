@@ -13,7 +13,7 @@ export default function App() {
   const [settings, setSettings] = useState(loadSettings);
   const [now, setNow] = useState(() => Date.now());
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [goals] = useState(() => saveGoals(loadGoals()));
+  const [goals, setGoals] = useState(() => saveGoals(loadGoals()));
 
   useEffect(() => {
     let frame;
@@ -31,6 +31,7 @@ export default function App() {
 
   const earnings = useMemo(() => calculateEarnings(now, settings), [now, settings]);
   const handleSave = (nextSettings) => setSettings(saveSettings(nextSettings));
+  const handleGoalsChange = (nextGoals) => setGoals(saveGoals(nextGoals));
   const displayAmount = (amount) => settings.privacyMode ? "₩••••••" : formatKRW(amount);
   const togglePrivacy = () => setSettings((prev) => saveSettings({ ...prev, privacyMode: !prev.privacyMode }));
 
@@ -52,7 +53,7 @@ export default function App() {
           <StatCard label="다음 급여일까지 남은 시간" value={earnings.remainingText} />
         </section>
         <ProgressBar value={earnings.progress} />
-        <GoalCards goals={goals} earned={earnings.earned} perSecond={earnings.perSecond} privacyMode={settings.privacyMode} />
+        <GoalCards goals={goals} earned={earnings.earned} perSecond={earnings.perSecond} privacyMode={settings.privacyMode} onGoalsChange={handleGoalsChange} />
         <LaborCalculator currentPerSecond={earnings.perSecond} averagePerSecond={earnings.averagePerSecond} privacyMode={settings.privacyMode} />
       </main>
       {isSettingsOpen && <SettingsModal settings={settings} onClose={() => setIsSettingsOpen(false)} onSave={handleSave} />}
