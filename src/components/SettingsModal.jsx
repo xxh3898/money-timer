@@ -70,7 +70,7 @@ export default function SettingsModal({ settings, onClose, onSave }) {
 
         <div className="form-grid two">
           <label>매월 급여일<input type="number" min="1" max="31" value={form.payday} onChange={(e) => update("payday", e.target.value)} /></label>
-          <label>지급 기준 시간<input value={form.paydayTime} placeholder="09:00" onChange={(e) => update("paydayTime", e.target.value)} /></label>
+          <label>지급 기준 시간<input type="time" value={form.paydayTime} onChange={(e) => update("paydayTime", e.target.value)} /></label>
         </div>
 
         <fieldset><legend>돈 증가 방식</legend><div className="segmented vertical">
@@ -81,8 +81,8 @@ export default function SettingsModal({ settings, onClose, onSave }) {
         <fieldset className={form.earningMode === "worktime" ? "" : "muted-section"}><legend>근무시간 설정</legend>
           <div className="day-row">{days.map(([value, label]) => <label key={value}><input type="checkbox" checked={form.workDays.includes(value)} onChange={() => toggleDay(value)} />{label}</label>)}</div>
           <div className="form-grid two">
-            <label>근무 시작<input value={form.workStartTime} onChange={(e) => update("workStartTime", e.target.value)} /></label>
-            <label>근무 종료<input value={form.workEndTime} onChange={(e) => update("workEndTime", e.target.value)} /></label>
+            <label>근무 시작<input type="time" value={form.workStartTime} onChange={(e) => update("workStartTime", e.target.value)} /></label>
+            <label>근무 종료<input type="time" value={form.workEndTime} onChange={(e) => update("workEndTime", e.target.value)} /></label>
           </div>
         </fieldset>
         <button className="save-button" type="submit">저장하기</button>
