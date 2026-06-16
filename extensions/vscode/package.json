@@ -2,7 +2,7 @@
   "name": "money-timer-vscode",
   "displayName": "Money Timer",
   "description": "Show real-time Money Timer earnings in the VS Code status bar.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "xxh3898",
   "engines": {
     "vscode": "^1.85.0"
