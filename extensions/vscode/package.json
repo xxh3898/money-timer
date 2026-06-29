@@ -2,7 +2,7 @@
   "name": "money-timer-vscode",
   "displayName": "Money Timer",
   "description": "Show real-time Money Timer earnings in the VS Code status bar.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "publisher": "xxh3898",
   "engines": {
     "vscode": "^1.85.0"
@@ -13,6 +13,8 @@
     "onCommand:moneyTimer.configure",
     "onCommand:moneyTimer.toggleVisibility",
     "onCommand:moneyTimer.showDetails",
+    "onCommand:moneyTimer.manageGoals",
+    "onCommand:moneyTimer.calculateLaborTime",
     "onCommand:moneyTimer.resetSettings"
   ],
   "main": "./extension.js",
@@ -21,6 +23,8 @@
       { "command": "moneyTimer.configure", "title": "Money Timer: Configure" },
       { "command": "moneyTimer.toggleVisibility", "title": "Money Timer: Toggle Visibility" },
       { "command": "moneyTimer.showDetails", "title": "Money Timer: Show Details" },
+      { "command": "moneyTimer.manageGoals", "title": "Money Timer: Manage Goals" },
+      { "command": "moneyTimer.calculateLaborTime", "title": "Money Timer: Calculate Labor Time" },
       { "command": "moneyTimer.resetSettings", "title": "Money Timer: Reset Settings" }
     ]
   },

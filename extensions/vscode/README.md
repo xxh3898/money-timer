@@ -1,6 +1,6 @@
 # Money Timer for VS Code
 
-VS Code 하단 Status Bar에 현재 급여 주기에서 지금까지 번 돈을 작게 표시하는 JavaScript 기반 확장입니다. 기존 Money Timer 웹앱의 순수 계산 코어를 재사용하며, 네트워크 요청·서버·DB·인증·텔레메트리는 포함하지 않습니다.
+VS Code 하단 Status Bar에 현재 급여 주기에서 지금까지 번 돈을 작게 표시하는 JavaScript 기반 확장입니다. 기존 Money Timer 웹앱과 같은 순수 계산 코어를 사용하며, 네트워크 요청·서버·DB·인증·텔레메트리는 포함하지 않습니다.
 
 ## 기능
 
@@ -12,10 +12,17 @@ VS Code 하단 Status Bar에 현재 급여 주기에서 지금까지 번 돈을 
   - 오늘 번 돈
   - 다음 급여일까지 남은 시간
   - 급여 주기 진행률
+- 프라이버시 모드를 켜면 Status Bar, Tooltip, 상세 보기의 금액을 마스킹합니다.
+- 목표 금액을 추가, 수정, 표시/숨김 전환, 삭제할 수 있습니다.
+- 목표별 달성률, 남은 금액, 남은 시간을 Tooltip과 상세 보기에서 확인할 수 있습니다.
+- 소비 금액을 입력해 현재 초당 수익 기준과 평균 초당 수익 기준의 노동시간으로 환산할 수 있습니다.
+- 휴식시간 제외 설정을 계산에 반영합니다.
 - 명령 팔레트 명령을 제공합니다.
   - `Money Timer: Configure`
   - `Money Timer: Toggle Visibility`
   - `Money Timer: Show Details`
+  - `Money Timer: Manage Goals`
+  - `Money Timer: Calculate Labor Time`
   - `Money Timer: Reset Settings`
 
 ## 실행 방법
@@ -50,10 +57,14 @@ npm run package
 - 세금 모드: `net`, `gross`
 - 급여일과 급여 지급 시간
 - 누적 모드: `always`, `worktime`
+- 프라이버시 모드
+- 휴식시간 제외
 - 근무 요일
 - 근무 시작/종료 시간
 
-설정은 VS Code의 `context.globalState`에 `moneyTimerSettings` 키로 저장됩니다. 잘못된 값은 기본 설정으로 보정됩니다.
+휴식시간은 `12:00-13:00,18:00-18:30`처럼 `HH:mm-HH:mm` 형식으로 입력하고 여러 개는 쉼표로 구분합니다. 중복 구간을 입력하면 중복 입력한 만큼 제외될 수 있으므로 같은 시간대를 반복해서 넣지 마세요.
+
+설정은 VS Code의 `context.globalState`에 `moneyTimerSettings` 키로 저장됩니다. 목표 목록은 `moneyTimerGoals` 키로 저장됩니다. 잘못된 값은 기본 설정으로 보정됩니다.
 
 ## 사용 주의
 
