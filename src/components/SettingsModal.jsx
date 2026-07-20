@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { isValidTimeString, parseTimeToMinutes } from "../utils/date";
 
 const days = [
@@ -11,6 +11,7 @@ const parseInputNumber = (value) => Number(onlyDigits(value));
 export default function SettingsModal({ settings, onClose, onSave }) {
   const [form, setForm] = useState(settings);
   const [error, setError] = useState("");
+  const titleId = useId();
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
   const updateMoney = (key, value) => update(key, parseInputNumber(value));
   const toggleDay = (day) => setForm((prev) => ({
@@ -25,6 +26,14 @@ export default function SettingsModal({ settings, onClose, onSave }) {
   }));
   const addBreak = () => setForm((prev) => ({ ...prev, breaks: [...(Array.isArray(prev.breaks) ? prev.breaks : []), { startTime: "", endTime: "", enabled: false }] }));
   const removeBreak = (index) => setForm((prev) => ({ ...prev, breaks: (Array.isArray(prev.breaks) ? prev.breaks : []).filter((_, itemIndex) => itemIndex !== index) }));
+
+  useEffect(() => {
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [onClose]);
 
   const validate = () => {
     const amountKey = { annual: "annualSalary", monthly: "monthlySalary", hourly: "hourlyWage" }[form.calculationType];
@@ -58,12 +67,12 @@ export default function SettingsModal({ settings, onClose, onSave }) {
 
   return (
     <div className="modal-backdrop" onMouseDown={onClose}>
-      <form className="modal" onSubmit={submit} onMouseDown={(event) => event.stopPropagation()}>
+      <form className="modal" role="dialog" aria-modal="true" aria-labelledby={titleId} onSubmit={submit} onMouseDown={(event) => event.stopPropagation()}>
         <div className="modal-header">
-          <h2>설정</h2>
+          <h2 id={titleId}>설정</h2>
           <button type="button" className="ghost-button" onClick={onClose} aria-label="닫기"><span aria-hidden="true">×</span></button>
         </div>
-        {error && <div className="error-box">{error}</div>}
+        {error && <div className="error-box" role="alert">{error}</div>}
 
         <fieldset><legend>계산 기준 선택</legend><div className="segmented">
           {[ ["annual", "연봉"], ["monthly", "월급"], ["hourly", "시급"] ].map(([value, label]) => (

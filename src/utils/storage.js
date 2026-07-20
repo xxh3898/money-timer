@@ -52,6 +52,29 @@ export function sanitizeSettings(settings) {
   };
 }
 
+export function hasCompleteSettings(settings) {
+  const sanitized = sanitizeSettings(settings);
+  const amountKey = {
+    annual: "annualSalary",
+    monthly: "monthlySalary",
+    hourly: "hourlyWage",
+  }[sanitized.calculationType];
+
+  if (!amountKey || sanitized[amountKey] <= 0) return false;
+  if (!["net", "gross"].includes(sanitized.taxMode)) return false;
+  if (sanitized.payday < 1 || sanitized.payday > 31) return false;
+  if (!isValidTimeString(sanitized.paydayTime)) return false;
+  if (!["always", "worktime"].includes(sanitized.earningMode)) return false;
+  if (sanitized.earningMode !== "worktime") return true;
+
+  const workStartMinutes = parseTimeToMinutes(sanitized.workStartTime);
+  const workEndMinutes = parseTimeToMinutes(sanitized.workEndTime);
+  return sanitized.workDays.length > 0
+    && workStartMinutes !== null
+    && workEndMinutes !== null
+    && workStartMinutes < workEndMinutes;
+}
+
 export function loadSettings() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);

@@ -16,7 +16,7 @@ export default function LaborCalculator({ currentPerSecond, averagePerSecond, pr
   return (
     <section className="feature-card labor-card" aria-label="소비 노동시간 계산기">
       <div className="section-head"><span>Calculator</span><h2>소비 노동시간 계산기</h2></div>
-      <label>소비 금액<input inputMode="numeric" value={formatLaborAmountInput(amount)} onChange={(e) => setAmount(digits(e.target.value))} /></label>
+      <label>소비 금액<input type={privacyMode ? "password" : "text"} inputMode="numeric" value={formatLaborAmountInput(amount)} onChange={(e) => setAmount(digits(e.target.value))} /></label>
       <div className="labor-result">
         <p>{privacyMode ? "₩••••••" : formatKRW(numericAmount)} =</p>
         <strong>{currentText}</strong><span>현재 초당 수익 기준</span>

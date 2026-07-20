@@ -1,5 +1,7 @@
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { formatGoalAmountInput, parseGoalAmount, validateGoalDraft } from "./GoalCards";
+import GoalCards, { formatGoalAmountInput, parseGoalAmount, validateGoalDraft } from "./GoalCards";
 
 describe("GoalCards", () => {
   it("should_formatAmount_when_goalAmountHasDigits", () => {
@@ -24,5 +26,19 @@ describe("GoalCards", () => {
 
   it("should_returnEmptyError_when_goalDraftIsValid", () => {
     expect(validateGoalDraft({ name: "점심", amount: "12000" })).toBe("");
+  });
+
+  it("should_maskGoalAmountInputs_when_privacyModeIsEnabled", () => {
+    const markup = renderToStaticMarkup(
+      <GoalCards
+        goals={[{ id: "goal-1", name: "점심", amount: 12000, enabled: true }]}
+        earned={1000}
+        perSecond={1}
+        privacyMode
+        onGoalsChange={() => {}}
+      />,
+    );
+
+    expect(markup.match(/type="password"/g)).toHaveLength(2);
   });
 });

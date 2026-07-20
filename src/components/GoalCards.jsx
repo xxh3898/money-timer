@@ -64,7 +64,7 @@ export default function GoalCards({ goals, earned, perSecond, privacyMode, onGoa
       <div className="section-head"><span>Goals</span><h2>목표 금액</h2></div>
       <form className="goal-form" onSubmit={addGoal}>
         <label>목표 이름<input value={newGoal.name} onChange={(e) => updateNewGoal("name", e.target.value)} placeholder="예: 점심" /></label>
-        <label>목표 금액<input inputMode="numeric" value={formatGoalAmountInput(newGoal.amount)} onChange={(e) => updateNewGoal("amount", digits(e.target.value))} placeholder="예: 12000" /></label>
+        <label>목표 금액<input type={privacyMode ? "password" : "text"} inputMode="numeric" value={formatGoalAmountInput(newGoal.amount)} onChange={(e) => updateNewGoal("amount", digits(e.target.value))} placeholder="예: 12000" /></label>
         <button type="submit" className="save-button inline-save">추가</button>
       </form>
       {error && <div className="error-box goal-error">{error}</div>}
@@ -77,7 +77,7 @@ export default function GoalCards({ goals, earned, perSecond, privacyMode, onGoa
             <article className={goal.enabled ? "goal-card" : "goal-card goal-card-disabled"} key={goal.id}>
               <div className="goal-edit-grid">
                 <label>이름<input value={draft.name} onChange={(e) => updateDraft(goal.id, "name", e.target.value)} /></label>
-                <label>금액<input inputMode="numeric" value={formatGoalAmountInput(draft.amount)} onChange={(e) => updateDraft(goal.id, "amount", digits(e.target.value))} /></label>
+                <label>금액<input type={privacyMode ? "password" : "text"} inputMode="numeric" value={formatGoalAmountInput(draft.amount)} onChange={(e) => updateDraft(goal.id, "amount", digits(e.target.value))} /></label>
               </div>
               <div className="goal-card-actions">
                 <label className="toggle-label"><input type="checkbox" checked={goal.enabled} onChange={() => toggleGoal(goal.id)} />표시</label>
