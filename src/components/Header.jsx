@@ -1,3 +1,5 @@
+import { Eye, EyeOff, Settings } from "lucide-react";
+
 export default function Header({ onOpenSettings, privacyMode, onTogglePrivacy }) {
   return (
     <header className="header">
@@ -6,11 +8,11 @@ export default function Header({ onOpenSettings, privacyMode, onTogglePrivacy })
         <h1>머니 타이머</h1>
       </div>
       <div className="header-actions">
-        <button className="icon-button" type="button" onClick={onTogglePrivacy} aria-label="개인정보 보호 모드 전환">
-          <span aria-hidden="true">{privacyMode ? "🙈" : "👁"}</span>
+        <button className="icon-button" type="button" onClick={onTogglePrivacy} aria-label={privacyMode ? "금액 표시" : "금액 숨기기"} aria-pressed={privacyMode}>
+          {privacyMode ? <EyeOff aria-hidden="true" size={22} /> : <Eye aria-hidden="true" size={22} />}
         </button>
         <button className="icon-button" type="button" onClick={onOpenSettings} aria-label="설정 열기">
-          <span aria-hidden="true">⚙</span>
+          <Settings aria-hidden="true" size={22} />
         </button>
       </div>
     </header>

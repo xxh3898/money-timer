@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Plus, Save, Trash2 } from "lucide-react";
 import { calculateGoalProgress, formatKRW, formatProgress, formatRemainingTime } from "../utils/money";
 
 const privateAmount = "₩••••••";
@@ -65,7 +66,7 @@ export default function GoalCards({ goals, earned, perSecond, privacyMode, onGoa
       <form className="goal-form" onSubmit={addGoal}>
         <label>목표 이름<input value={newGoal.name} onChange={(e) => updateNewGoal("name", e.target.value)} placeholder="예: 점심" /></label>
         <label>목표 금액<input type={privacyMode ? "password" : "text"} inputMode="numeric" value={formatGoalAmountInput(newGoal.amount)} onChange={(e) => updateNewGoal("amount", digits(e.target.value))} placeholder="예: 12000" /></label>
-        <button type="submit" className="save-button inline-save">추가</button>
+        <button type="submit" className="save-button inline-save"><Plus aria-hidden="true" size={18} />추가</button>
       </form>
       {error && <div className="error-box goal-error">{error}</div>}
       {!safeGoals.length && <p className="empty-goals">등록된 목표가 없습니다.</p>}
@@ -81,8 +82,8 @@ export default function GoalCards({ goals, earned, perSecond, privacyMode, onGoa
               </div>
               <div className="goal-card-actions">
                 <label className="toggle-label"><input type="checkbox" checked={goal.enabled} onChange={() => toggleGoal(goal.id)} />표시</label>
-                <button type="button" className="text-button" onClick={() => saveDraft(goal.id)}>저장</button>
-                <button type="button" className="text-button danger-button" onClick={() => deleteGoal(goal.id)} aria-label={`${goal.name} 삭제`}>삭제</button>
+                <button type="button" className="text-button" onClick={() => saveDraft(goal.id)}><Save aria-hidden="true" size={18} />저장</button>
+                <button type="button" className="text-button danger-button" onClick={() => deleteGoal(goal.id)} aria-label={`${goal.name} 삭제`}><Trash2 aria-hidden="true" size={18} />삭제</button>
               </div>
               <div><span>{goal.enabled ? "진행 중" : "숨김"}</span><strong>{privacyMode ? privateAmount : formatKRW(goal.amount)}</strong></div>
               {goal.enabled ? (

@@ -41,4 +41,21 @@ describe("GoalCards", () => {
 
     expect(markup.match(/type="password"/g)).toHaveLength(2);
   });
+
+  it("should_renderSvgActionIconsWithText_when_goalsAreShown", () => {
+    const markup = renderToStaticMarkup(
+      <GoalCards
+        goals={[{ id: "goal-1", name: "점심", amount: 12000, enabled: true }]}
+        earned={1000}
+        perSecond={1}
+        privacyMode={false}
+        onGoalsChange={() => {}}
+      />,
+    );
+
+    expect(markup.match(/<svg/g) || []).toHaveLength(3);
+    expect(markup).toContain("추가");
+    expect(markup).toContain("저장");
+    expect(markup).toContain("삭제");
+  });
 });

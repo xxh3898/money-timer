@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from "react";
+import { Plus, Save, Trash2, X } from "lucide-react";
 import { isValidTimeString, parseTimeToMinutes } from "../utils/date";
 
 const days = [
@@ -70,7 +71,7 @@ export default function SettingsModal({ settings, onClose, onSave }) {
       <form className="modal" role="dialog" aria-modal="true" aria-labelledby={titleId} onSubmit={submit} onMouseDown={(event) => event.stopPropagation()}>
         <div className="modal-header">
           <h2 id={titleId}>설정</h2>
-          <button type="button" className="ghost-button" onClick={onClose} aria-label="닫기"><span aria-hidden="true">×</span></button>
+          <button type="button" className="ghost-button" onClick={onClose} aria-label="닫기"><X aria-hidden="true" size={20} /></button>
         </div>
         {error && <div className="error-box" role="alert">{error}</div>}
 
@@ -113,10 +114,10 @@ export default function SettingsModal({ settings, onClose, onSave }) {
               <label className="toggle-label"><input type="checkbox" checked={item.enabled} onChange={(e) => updateBreak(index, "enabled", e.target.checked)} />제외</label>
               <label>시작<input type="time" value={item.startTime} onChange={(e) => updateBreak(index, "startTime", e.target.value)} /></label>
               <label>종료<input type="time" value={item.endTime} onChange={(e) => updateBreak(index, "endTime", e.target.value)} /></label>
-              <button type="button" className="ghost-button" onClick={() => removeBreak(index)} aria-label="휴식시간 삭제">−</button>
+              <button type="button" className="ghost-button" onClick={() => removeBreak(index)} aria-label="휴식시간 삭제"><Trash2 aria-hidden="true" size={18} /></button>
             </div>
           ))}
-          <button type="button" className="text-button" onClick={addBreak}>휴식시간 추가</button>
+          <button type="button" className="text-button" onClick={addBreak}><Plus aria-hidden="true" size={18} />휴식시간 추가</button>
         </fieldset>
 
         <fieldset className={form.earningMode === "worktime" ? "" : "muted-section"}><legend>근무시간 설정</legend>
@@ -126,7 +127,7 @@ export default function SettingsModal({ settings, onClose, onSave }) {
             <label>근무 종료<input type="time" value={form.workEndTime} onChange={(e) => update("workEndTime", e.target.value)} /></label>
           </div>
         </fieldset>
-        <button className="save-button" type="submit">저장하기</button>
+        <button className="save-button" type="submit"><Save aria-hidden="true" size={20} />저장하기</button>
       </form>
     </div>
   );

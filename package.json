@@ -6,9 +6,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "vite": "latest",
+    "lucide-react": "1.24.0",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "vite": "latest"
   },
   "devDependencies": {
     "vitest": "latest"

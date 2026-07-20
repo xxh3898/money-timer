@@ -50,6 +50,15 @@ describe("App", () => {
     expect(markup).not.toContain("이번 급여 주기 진행률");
   });
 
+  it("should_renderAccessibleSvgIcons_when_onboardingIsShown", () => {
+    const markup = renderToStaticMarkup(<App />);
+
+    expect((markup.match(/<svg/g) || []).length).toBeGreaterThanOrEqual(6);
+    expect(markup).toContain('aria-label="금액 숨기기"');
+    expect(markup).toContain('aria-pressed="false"');
+    expect(markup).not.toMatch(/[🙈👁⚙×−]/);
+  });
+
   it("should_renderDashboard_when_settingsAreComplete", () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(completeSettings));
 
@@ -66,5 +75,15 @@ describe("App", () => {
 
     expect(markup).toContain("초당 ₩••••••");
     expect(markup).not.toContain("초당 ₩1.16");
+  });
+
+  it("should_describePrivacyToggleState_when_privacyModeIsEnabled", () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...completeSettings, privacyMode: true }));
+
+    const markup = renderToStaticMarkup(<App />);
+
+    expect(markup).toContain('aria-label="금액 표시"');
+    expect(markup).toContain('aria-pressed="true"');
+    expect(markup).not.toContain("🙈");
   });
 });

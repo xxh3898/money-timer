@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Settings } from "lucide-react";
 import Header from "./components/Header";
 import MoneyDisplay from "./components/MoneyDisplay";
 import StatCard from "./components/StatCard";
@@ -65,7 +66,7 @@ export default function App() {
             <span>시작하기</span>
             <h2 id="onboarding-title">급여 정보를 설정해 주세요</h2>
             <p>급여 기준과 지급일을 입력하면 현재까지 번 돈을 계산해 보여 드립니다.</p>
-            <button type="button" className="onboarding-button" onClick={() => setIsSettingsOpen(true)}>설정 시작하기</button>
+            <button type="button" className="onboarding-button" onClick={() => setIsSettingsOpen(true)}><Settings aria-hidden="true" size={20} />설정 시작하기</button>
           </section>
         )}
       </main>
