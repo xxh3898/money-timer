@@ -1,21 +1,32 @@
 {
-  "name": "money-timer-vscode",
+  "name": "money-timer",
   "displayName": "Money Timer",
-  "description": "Show real-time Money Timer earnings in the VS Code status bar.",
-  "version": "0.2.0",
+  "description": "Track real-time take-home earnings in the VS Code status bar. All data stays local.",
+  "version": "0.3.0",
   "publisher": "xxh3898",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xxh3898/money-timer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xxh3898/money-timer/issues"
+  },
+  "homepage": "https://github.com/xxh3898/money-timer#readme",
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": ["Other"],
+  "keywords": ["salary", "earnings", "timer", "productivity", "status-bar"],
+  "icon": "assets/icon.png",
+  "galleryBanner": {
+    "color": "#0B3CC1",
+    "theme": "dark"
+  },
+  "pricing": "Free",
+  "preview": true,
   "activationEvents": [
-    "onStartupFinished",
-    "onCommand:moneyTimer.configure",
-    "onCommand:moneyTimer.toggleVisibility",
-    "onCommand:moneyTimer.showDetails",
-    "onCommand:moneyTimer.manageGoals",
-    "onCommand:moneyTimer.calculateLaborTime",
-    "onCommand:moneyTimer.resetSettings"
+    "onStartupFinished"
   ],
   "main": "./extension.js",
   "contributes": {
