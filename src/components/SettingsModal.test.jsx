@@ -24,4 +24,16 @@ describe("SettingsModal", () => {
     expect(markup).toContain("저장하기");
     expect(markup).not.toMatch(/[×−]/);
   });
+
+  it("should_describeTakeHomeAmounts_when_salaryFieldsAreShown", () => {
+    const markup = renderToStaticMarkup(
+      <SettingsModal settings={DEFAULT_SETTINGS} onClose={() => {}} onSave={() => {}} />,
+    );
+
+    expect(markup).toContain("연 실수령액");
+    expect(markup).toContain("월 실수령액");
+    expect(markup).toContain("실수령 시급");
+    expect(markup).not.toContain("세전 / 세후");
+    expect(markup).not.toContain('name="taxMode"');
+  });
 });

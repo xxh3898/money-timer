@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { calculateEarnings, calculateGoalProgress, DEFAULT_GOALS, DEFAULT_SETTINGS, getCurrentCycle, getEligibleSeconds, getNetAmount } from "./index.mjs";
+import { calculateEarnings, calculateGoalProgress, DEFAULT_GOALS, DEFAULT_SETTINGS, getCurrentCycle, getEligibleSeconds, getSelectedBaseAmount } from "./index.mjs";
 
 const settings = { ...DEFAULT_SETTINGS, earningMode: "worktime", workDays: [1,2,3,4,5], workStartTime: "09:00", workEndTime: "18:00" };
 
 describe("money timer core", () => {
-  it("should_calculateNetAmount_when_taxModeIsGross", () => {
-    expect(getNetAmount(30000000, "gross")).toBe(27000000);
+  it("should_useEnteredAmount_when_monthlySalaryIsConfigured", () => {
+    expect(getSelectedBaseAmount({ ...DEFAULT_SETTINGS, calculationType: "monthly", monthlySalary: 30000000, taxMode: "gross" })).toBe(30000000);
   });
 
   it("should_returnPreviousPayCycle_when_currentDateIsBeforeThisMonthPayday", () => {
@@ -34,6 +34,35 @@ describe("money timer core", () => {
     expect(getEligibleSeconds(start, end, withBreak)).toBe(8 * 3600);
   });
 
+  it("should_excludeDuplicateBreakOnce_when_breakRangesAreEqual", () => {
+    const withDuplicateBreaks = {
+      ...settings,
+      breaks: [
+        { startTime: "12:00", endTime: "13:00", enabled: true },
+        { startTime: "12:00", endTime: "13:00", enabled: true },
+      ],
+    };
+    const start = new Date(2026, 5, 15, 9);
+    const end = new Date(2026, 5, 15, 18);
+
+    expect(getEligibleSeconds(start, end, withDuplicateBreaks)).toBe(8 * 3600);
+  });
+
+  it("should_mergeOverlappingAndAdjacentBreaks_when_breakRangesTouch", () => {
+    const withOverlappingBreaks = {
+      ...settings,
+      breaks: [
+        { startTime: "12:00", endTime: "13:00", enabled: true },
+        { startTime: "12:30", endTime: "13:30", enabled: true },
+        { startTime: "13:30", endTime: "14:00", enabled: true },
+      ],
+    };
+    const start = new Date(2026, 5, 15, 9);
+    const end = new Date(2026, 5, 15, 18);
+
+    expect(getEligibleSeconds(start, end, withOverlappingBreaks)).toBe(7 * 3600);
+  });
+
   it("should_calculateRemainingGoalTime_when_perSecondIsPositive", () => {
     const result = calculateGoalProgress({ amount: 12000 }, 2000, 100);
     expect(result.remainingAmount).toBe(10000);
@@ -47,7 +76,6 @@ describe("money timer core", () => {
       annualSalary: 0,
       monthlySalary: 0,
       hourlyWage: 0,
-      taxMode: "",
       payday: 0,
       paydayTime: "",
       earningMode: "",
@@ -58,6 +86,7 @@ describe("money timer core", () => {
       privacyMode: false,
       theme: "light",
     });
+    expect(DEFAULT_SETTINGS).not.toHaveProperty("taxMode");
     expect(DEFAULT_GOALS).toEqual([]);
   });
 

@@ -1,4 +1,4 @@
-import { DEFAULT_GOALS, DEFAULT_SETTINGS, isValidTimeString, parseTimeToMinutes } from "../core";
+import { DEFAULT_GOALS, DEFAULT_SETTINGS, isValidTimeString, migrateSettings, parseTimeToMinutes, SETTINGS_SCHEMA_VERSION } from "../core";
 
 export const STORAGE_KEY = "moneyTimerSettings";
 export const GOALS_STORAGE_KEY = "moneyTimerGoals";
@@ -17,13 +17,12 @@ const sanitizeBreaks = (breaks) => {
 };
 
 export function mergeWithDefaultSettings(settings) {
-  return { ...DEFAULT_SETTINGS, ...(settings && typeof settings === "object" ? settings : {}) };
+  return { ...DEFAULT_SETTINGS, ...migrateSettings(settings) };
 }
 
 export function sanitizeSettings(settings) {
   const merged = mergeWithDefaultSettings(settings);
   const calculationType = ["annual", "monthly", "hourly"].includes(merged.calculationType) ? merged.calculationType : DEFAULT_SETTINGS.calculationType;
-  const taxMode = ["net", "gross"].includes(merged.taxMode) ? merged.taxMode : DEFAULT_SETTINGS.taxMode;
   const earningMode = ["always", "worktime"].includes(merged.earningMode) ? merged.earningMode : DEFAULT_SETTINGS.earningMode;
   const theme = ["light", "dark", "system"].includes(merged.theme) ? merged.theme : DEFAULT_SETTINGS.theme;
   const workDays = Array.isArray(merged.workDays)
@@ -35,11 +34,11 @@ export function sanitizeSettings(settings) {
   const workEndMinutes = parseTimeToMinutes(workEndTime);
 
   return {
+    settingsVersion: SETTINGS_SCHEMA_VERSION,
     calculationType,
     annualSalary: Math.max(0, numberOrDefault(merged.annualSalary, DEFAULT_SETTINGS.annualSalary)),
     monthlySalary: Math.max(0, numberOrDefault(merged.monthlySalary, DEFAULT_SETTINGS.monthlySalary)),
     hourlyWage: Math.max(0, numberOrDefault(merged.hourlyWage, DEFAULT_SETTINGS.hourlyWage)),
-    taxMode,
     payday: Math.min(Math.max(Math.trunc(numberOrDefault(merged.payday, DEFAULT_SETTINGS.payday)), 0), 31),
     paydayTime: isValidTimeString(merged.paydayTime) ? merged.paydayTime : DEFAULT_SETTINGS.paydayTime,
     earningMode,
@@ -61,7 +60,6 @@ export function hasCompleteSettings(settings) {
   }[sanitized.calculationType];
 
   if (!amountKey || sanitized[amountKey] <= 0) return false;
-  if (!["net", "gross"].includes(sanitized.taxMode)) return false;
   if (sanitized.payday < 1 || sanitized.payday > 31) return false;
   if (!isValidTimeString(sanitized.paydayTime)) return false;
   if (!["always", "worktime"].includes(sanitized.earningMode)) return false;
@@ -78,10 +76,19 @@ export function hasCompleteSettings(settings) {
 export function loadSettings() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_SETTINGS;
-    return sanitizeSettings(JSON.parse(raw));
+    if (!raw) return sanitizeSettings(DEFAULT_SETTINGS);
+    const parsed = JSON.parse(raw);
+    const sanitized = sanitizeSettings(parsed);
+    if (JSON.stringify(parsed) !== JSON.stringify(sanitized)) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
+      } catch {
+        // 저장소 쓰기가 막혀도 현재 세션에서는 마이그레이션한 설정을 사용합니다.
+      }
+    }
+    return sanitized;
   } catch {
-    return DEFAULT_SETTINGS;
+    return sanitizeSettings(DEFAULT_SETTINGS);
   }
 }
 

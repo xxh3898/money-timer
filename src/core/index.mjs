@@ -1,9 +1,10 @@
+export const SETTINGS_SCHEMA_VERSION = 1;
+
 export const DEFAULT_SETTINGS = {
   calculationType: "",
   annualSalary: 0,
   monthlySalary: 0,
   hourlyWage: 0,
-  taxMode: "",
   payday: 0,
   paydayTime: "",
   earningMode: "",
@@ -17,6 +18,7 @@ export const DEFAULT_SETTINGS = {
 
 const wonFormatter = new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 });
 export const DEFAULT_GOALS = [];
+const AMOUNT_SETTING_KEYS = ["annualSalary", "monthlySalary", "hourlyWage"];
 
 const safe = (value) => (Number.isFinite(value) ? Math.max(0, value) : 0);
 const secondsBetween = (start, end) => safe((new Date(end).getTime() - new Date(start).getTime()) / 1000);
@@ -90,21 +92,31 @@ export function formatKRWPerSecond(amount) {
   return `초당 ₩${safe(amount).toLocaleString("ko-KR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-export function getNetAmount(amount, taxMode) {
-  const numericAmount = Number(amount) || 0;
-  if (taxMode === "gross") return numericAmount * 0.9;
-  return numericAmount;
+export function migrateSettings(settings) {
+  const source = settings && typeof settings === "object" ? settings : {};
+  const migrated = { ...source, settingsVersion: SETTINGS_SCHEMA_VERSION };
+  const sourceVersion = Number(source.settingsVersion);
+
+  if (!Number.isFinite(sourceVersion) || sourceVersion < SETTINGS_SCHEMA_VERSION) {
+    const multiplier = source.taxMode === "gross" ? 0.9 : 1;
+    for (const key of AMOUNT_SETTING_KEYS) {
+      if (Object.hasOwn(source, key)) migrated[key] = (Number(source[key]) || 0) * multiplier;
+    }
+  }
+
+  delete migrated.taxMode;
+  return migrated;
 }
 
 export function getSelectedBaseAmount(settings) {
-  if (settings.calculationType === "monthly") return getNetAmount(settings.monthlySalary, settings.taxMode);
-  if (settings.calculationType === "hourly") return getNetAmount(settings.hourlyWage, settings.taxMode);
-  return getNetAmount(settings.annualSalary, settings.taxMode);
+  if (settings.calculationType === "monthly") return safe(Number(settings.monthlySalary));
+  if (settings.calculationType === "hourly") return safe(Number(settings.hourlyWage));
+  return safe(Number(settings.annualSalary));
 }
 
 export function getCyclePay(settings) {
-  if (settings.calculationType === "annual") return getNetAmount(settings.annualSalary, settings.taxMode) / 12;
-  if (settings.calculationType === "monthly") return getNetAmount(settings.monthlySalary, settings.taxMode);
+  if (settings.calculationType === "annual") return safe(Number(settings.annualSalary)) / 12;
+  if (settings.calculationType === "monthly") return safe(Number(settings.monthlySalary));
   return 0;
 }
 
@@ -124,9 +136,31 @@ export function isInWorkTime(date, settings) {
 }
 
 export function getEnabledBreaks(settings) {
-  return Array.isArray(settings?.breaks)
-    ? settings.breaks.filter((item) => item?.enabled && parseTimeToMinutes(item.startTime) !== null && parseTimeToMinutes(item.endTime) !== null && parseTimeToMinutes(item.startTime) < parseTimeToMinutes(item.endTime))
-    : [];
+  if (!Array.isArray(settings?.breaks)) return [];
+
+  const normalized = settings.breaks
+    .filter((item) => item?.enabled)
+    .map((item) => ({
+      startTime: item.startTime,
+      endTime: item.endTime,
+      startMinutes: parseTimeToMinutes(item.startTime),
+      endMinutes: parseTimeToMinutes(item.endTime),
+    }))
+    .filter((item) => item.startMinutes !== null && item.endMinutes !== null && item.startMinutes < item.endMinutes)
+    .sort((left, right) => left.startMinutes - right.startMinutes || left.endMinutes - right.endMinutes);
+
+  const merged = [];
+  for (const item of normalized) {
+    const previous = merged.at(-1);
+    if (!previous || item.startMinutes > previous.endMinutes) {
+      merged.push({ ...item });
+    } else if (item.endMinutes > previous.endMinutes) {
+      previous.endMinutes = item.endMinutes;
+      previous.endTime = item.endTime;
+    }
+  }
+
+  return merged.map(({ startTime, endTime }) => ({ startTime, endTime, enabled: true }));
 }
 
 function getBreakSecondsForDay(segmentStart, segmentEnd, day, settings) {
@@ -192,7 +226,7 @@ export function calculateEarnings(now, settings = DEFAULT_SETTINGS) {
   const todayEligibleSeconds = getEligibleSeconds(todayFrom, current, settings);
   const totalCalendarSeconds = secondsBetween(cycleStart, cycleEnd);
   const elapsedCalendarSeconds = secondsBetween(cycleStart, current);
-  const hourlyNetWage = getNetAmount(settings.hourlyWage, settings.taxMode);
+  const hourlyWage = safe(Number(settings.hourlyWage));
   const cyclePay = getCyclePay(settings);
   const activeNow = settings.earningMode === "always" || isInWorkTime(current, settings);
 
@@ -201,9 +235,9 @@ export function calculateEarnings(now, settings = DEFAULT_SETTINGS) {
   let todayEarned = 0;
 
   if (settings.calculationType === "hourly") {
-    earned = hourlyNetWage * elapsedEligibleSeconds / 3600;
-    perSecond = activeNow ? hourlyNetWage / 3600 : 0;
-    todayEarned = hourlyNetWage * todayEligibleSeconds / 3600;
+    earned = hourlyWage * elapsedEligibleSeconds / 3600;
+    perSecond = activeNow ? hourlyWage / 3600 : 0;
+    todayEarned = hourlyWage * todayEligibleSeconds / 3600;
   } else if (totalEligibleSeconds > 0) {
     earned = cyclePay * elapsedEligibleSeconds / totalEligibleSeconds;
     perSecond = activeNow ? cyclePay / totalEligibleSeconds : 0;
@@ -213,7 +247,7 @@ export function calculateEarnings(now, settings = DEFAULT_SETTINGS) {
   return {
     earned: safe(earned),
     perSecond: safe(perSecond),
-    averagePerSecond: safe(settings.calculationType === "hourly" ? hourlyNetWage / 3600 : (totalEligibleSeconds > 0 ? cyclePay / totalEligibleSeconds : 0)),
+    averagePerSecond: safe(settings.calculationType === "hourly" ? hourlyWage / 3600 : (totalEligibleSeconds > 0 ? cyclePay / totalEligibleSeconds : 0)),
     totalEligibleSeconds: safe(totalEligibleSeconds),
     todayEarned: safe(todayEarned),
     cycleEarned: safe(earned),

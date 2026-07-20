@@ -8,7 +8,6 @@ export {
   formatRemainingTime,
   getCyclePay,
   getEligibleSeconds,
-  getNetAmount,
   getSelectedBaseAmount,
   isInWorkTime,
 } from "../core";

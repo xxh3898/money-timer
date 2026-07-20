@@ -15,11 +15,11 @@ function createLocalStorage() {
 }
 
 const completeSettings = {
+  settingsVersion: 1,
   calculationType: "monthly",
   annualSalary: 0,
   monthlySalary: 3000000,
   hourlyWage: 0,
-  taxMode: "net",
   payday: 25,
   paydayTime: "09:00",
   earningMode: "always",

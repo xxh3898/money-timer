@@ -57,7 +57,7 @@ function sanitizeBreaks(breaks) {
 
 function sanitizeSettings(settings) {
   const defaults = core.DEFAULT_SETTINGS;
-  const merged = { ...defaults, ...(settings && typeof settings === "object" ? settings : {}) };
+  const merged = { ...defaults, ...core.migrateSettings(settings) };
   const workDays = Array.isArray(merged.workDays)
     ? [...new Set(merged.workDays.map(Number).filter((day) => Number.isInteger(day) && day >= 0 && day <= 6))]
     : defaults.workDays;
@@ -68,11 +68,11 @@ function sanitizeSettings(settings) {
   const numericPayday = Number(merged.payday);
 
   return {
+    settingsVersion: core.SETTINGS_SCHEMA_VERSION,
     calculationType: ["annual", "monthly", "hourly"].includes(merged.calculationType) ? merged.calculationType : defaults.calculationType,
     annualSalary: isValidNumber(merged.annualSalary) ? Number(merged.annualSalary) : defaults.annualSalary,
     monthlySalary: isValidNumber(merged.monthlySalary) ? Number(merged.monthlySalary) : defaults.monthlySalary,
     hourlyWage: isValidNumber(merged.hourlyWage) ? Number(merged.hourlyWage) : defaults.hourlyWage,
-    taxMode: ["net", "gross"].includes(merged.taxMode) ? merged.taxMode : defaults.taxMode,
     payday: Number.isFinite(numericPayday) ? Math.min(Math.max(Math.trunc(numericPayday), 0), 31) : defaults.payday,
     paydayTime: core.isValidTimeString(merged.paydayTime) ? merged.paydayTime : defaults.paydayTime,
     earningMode: ["always", "worktime"].includes(merged.earningMode) ? merged.earningMode : defaults.earningMode,
@@ -275,10 +275,9 @@ async function promptGoalAmount(title, current = 0) {
 async function configure() {
   const next = { ...getSettings() };
   next.calculationType = await promptQuickPick("계산 방식", ["annual", "monthly", "hourly"], next.calculationType);
-  next.annualSalary = await promptNumber("연봉", next.annualSalary, (v) => Number.isFinite(v) && v >= 0);
-  next.monthlySalary = await promptNumber("월급", next.monthlySalary, (v) => Number.isFinite(v) && v >= 0);
-  next.hourlyWage = await promptNumber("시급", next.hourlyWage, (v) => Number.isFinite(v) && v >= 0);
-  next.taxMode = await promptQuickPick("세금 모드", ["net", "gross"], next.taxMode);
+  next.annualSalary = await promptNumber("연 실수령액", next.annualSalary, (v) => Number.isFinite(v) && v >= 0);
+  next.monthlySalary = await promptNumber("월 실수령액", next.monthlySalary, (v) => Number.isFinite(v) && v >= 0);
+  next.hourlyWage = await promptNumber("실수령 시급", next.hourlyWage, (v) => Number.isFinite(v) && v >= 0);
   next.payday = await promptNumber("급여일", next.payday, (v) => Number.isInteger(v) && v >= 1 && v <= 31);
   next.paydayTime = await promptTime("급여 지급 시간", next.paydayTime);
   next.earningMode = await promptQuickPick("누적 모드", ["always", "worktime"], next.earningMode);
@@ -434,6 +433,13 @@ async function resetSettings() {
 async function activate(context) {
   extensionContext = context;
   await loadCore(context);
+  const storedSettings = context.globalState.get(SETTINGS_KEY);
+  if (storedSettings !== undefined) {
+    const migratedSettings = sanitizeSettings(storedSettings);
+    if (JSON.stringify(storedSettings) !== JSON.stringify(migratedSettings)) {
+      await context.globalState.update(SETTINGS_KEY, migratedSettings);
+    }
+  }
   statusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   context.subscriptions.push(statusItem);
   context.subscriptions.push(vscode.commands.registerCommand("moneyTimer.configure", configure));

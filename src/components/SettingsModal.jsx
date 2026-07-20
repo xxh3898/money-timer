@@ -40,7 +40,6 @@ export default function SettingsModal({ settings, onClose, onSave }) {
     const amountKey = { annual: "annualSalary", monthly: "monthlySalary", hourly: "hourlyWage" }[form.calculationType];
     if (!["annual", "monthly", "hourly"].includes(form.calculationType)) return "계산 기준을 선택해 주세요.";
     if (!amountKey || Number(form[amountKey]) <= 0) return "선택된 계산 기준의 금액은 0보다 커야 합니다.";
-    if (!["gross", "net"].includes(form.taxMode)) return "세전/세후 선택값이 올바르지 않습니다.";
     if (Number(form.payday) < 1 || Number(form.payday) > 31) return "급여일은 1~31 사이로 입력해 주세요.";
     if (!isValidTimeString(form.paydayTime)) return "급여 지급 기준 시간은 HH:mm 형식이어야 합니다.";
     if (!["always", "worktime"].includes(form.earningMode)) return "돈 증가 방식을 선택해 주세요.";
@@ -76,21 +75,17 @@ export default function SettingsModal({ settings, onClose, onSave }) {
         {error && <div className="error-box" role="alert">{error}</div>}
 
         <fieldset><legend>계산 기준 선택</legend><div className="segmented">
-          {[ ["annual", "연봉"], ["monthly", "월급"], ["hourly", "시급"] ].map(([value, label]) => (
+          {[ ["annual", "연 실수령액"], ["monthly", "월 실수령액"], ["hourly", "실수령 시급"] ].map(([value, label]) => (
             <label key={value}><input type="radio" name="calculationType" checked={form.calculationType === value} onChange={() => update("calculationType", value)} />{label}</label>
           ))}
         </div></fieldset>
 
         <div className="form-grid">
-          <label>연봉<input inputMode="numeric" value={formatInputNumber(form.annualSalary)} onChange={(e) => updateMoney("annualSalary", e.target.value)} /></label>
-          <label>월급<input inputMode="numeric" value={formatInputNumber(form.monthlySalary)} onChange={(e) => updateMoney("monthlySalary", e.target.value)} /></label>
-          <label>시급<input inputMode="numeric" value={formatInputNumber(form.hourlyWage)} onChange={(e) => updateMoney("hourlyWage", e.target.value)} /></label>
+          <label>연 실수령액<input inputMode="numeric" value={formatInputNumber(form.annualSalary)} onChange={(e) => updateMoney("annualSalary", e.target.value)} /></label>
+          <label>월 실수령액<input inputMode="numeric" value={formatInputNumber(form.monthlySalary)} onChange={(e) => updateMoney("monthlySalary", e.target.value)} /></label>
+          <label>실수령 시급<input inputMode="numeric" value={formatInputNumber(form.hourlyWage)} onChange={(e) => updateMoney("hourlyWage", e.target.value)} /></label>
         </div>
-
-        <fieldset><legend>세전 / 세후</legend><div className="segmented">
-          <label><input type="radio" name="taxMode" checked={form.taxMode === "net"} onChange={() => update("taxMode", "net")} />세후</label>
-          <label><input type="radio" name="taxMode" checked={form.taxMode === "gross"} onChange={() => update("taxMode", "gross")} />세전</label>
-        </div><p className="hint">세전 기준은 입력 금액의 90%를 세후 금액으로 간주합니다.</p></fieldset>
+        <p className="hint">세금과 공제 계산 없이 실제로 받는 금액을 입력해 주세요.</p>
 
         <div className="form-grid two">
           <label>매월 급여일<input type="number" min="1" max="31" value={form.payday} onChange={(e) => update("payday", e.target.value)} /></label>
