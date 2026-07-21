@@ -39,6 +39,10 @@
       { "command": "moneyTimer.resetSettings", "title": "Money Timer: Reset Settings" }
     ]
   },
+  "vsce": {
+    "baseContentUrl": "https://github.com/xxh3898/money-timer/blob/main/extensions/vscode",
+    "baseImagesUrl": "https://raw.githubusercontent.com/xxh3898/money-timer/main/extensions/vscode"
+  },
   "scripts": {
     "dev": "code --extensionDevelopmentPath=.",
     "package": "vsce package"
