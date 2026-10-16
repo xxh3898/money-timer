@@ -13,7 +13,7 @@ Money Timer는 VS Code 하단 Status Bar에서 현재 급여 주기에 지금까
 3. publisher가 `xxh3898`인지 확인합니다.
 4. **Install**을 선택합니다.
 
-설치가 끝나면 Status Bar 오른쪽에 Money Timer가 표시됩니다.
+설치가 끝나면 기본으로 Status Bar 오른쪽에 Money Timer가 표시됩니다. 설정에서 왼쪽으로 옮길 수 있습니다.
 
 ## 처음 시작하기
 
@@ -65,6 +65,20 @@ Money Timer는 VS Code 하단 Status Bar에서 현재 급여 주기에 지금까
 - 근무 시작/종료 시간
 
 휴식시간은 `12:00-13:00,18:00-18:30`처럼 `HH:mm-HH:mm` 형식으로 입력하고 여러 개는 쉼표로 구분합니다. 중복되거나 겹치거나 맞닿은 구간은 하나로 합쳐 한 번만 제외합니다.
+
+## 표시 위치 (0.3.1)
+
+설정 화면(`Ctrl+,`)에서 `@id:moneyTimer.position`을 검색해 `left`(왼쪽) 또는 `right`(오른쪽, 기본값)를 선택하세요. 사용자 `settings.json`에 아래 항목을 추가해도 됩니다.
+
+```json
+{
+  "moneyTimer.position": "left"
+}
+```
+
+변경은 즉시 반영합니다. 급여·근무시간·휴식시간·목표·프라이버시 설정과 표시/숨김 상태, 1초 갱신 타이머를 유지합니다. 숨김 상태에서 위치를 바꿔도 계속 숨겨집니다. 잘못된 위치 값은 오른쪽으로 보정하며 정확한 가운데 배치는 지원하지 않습니다.
+
+로컬 `money-timer-0.3.1.vsix`는 **Extensions: Install from VSIX...**로 설치할 수 있습니다. 설치·업데이트 후 **Developer: Reload Window**로 창을 다시 로드하면 새 위치 설정이 등록됩니다. 같은 확장 ID인 `xxh3898.money-timer`의 기존 설정은 재입력할 필요가 없습니다. 오른쪽으로 돌아가려면 `right`로 선택하세요.
 
 ## 데이터와 개인정보
 

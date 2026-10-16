@@ -1,3 +1,4 @@
 **/*.test.mjs
 package-lock.json
 *.vsix
+test/**

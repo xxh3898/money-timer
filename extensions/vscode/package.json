@@ -2,7 +2,7 @@
   "name": "money-timer",
   "displayName": "Money Timer",
   "description": "Track real-time take-home earnings in the VS Code status bar. All data stays local.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "xxh3898",
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
@@ -37,7 +37,17 @@
       { "command": "moneyTimer.manageGoals", "title": "Money Timer: Manage Goals" },
       { "command": "moneyTimer.calculateLaborTime", "title": "Money Timer: Calculate Labor Time" },
       { "command": "moneyTimer.resetSettings", "title": "Money Timer: Reset Settings" }
-    ]
+    ],
+    "configuration": {
+      "title": "Money Timer",
+      "properties": {
+        "moneyTimer.position": {
+          "type": "string", "scope": "application", "enum": ["left", "right"], "default": "right",
+          "enumDescriptions": ["상태 표시줄 왼쪽에 표시합니다.", "상태 표시줄 오른쪽에 표시합니다."],
+          "description": "Money Timer 표시 위치. 기존 급여 설정과 표시 여부를 유지한 채 바로 적용합니다."
+        }
+      }
+    }
   },
   "vsce": {
     "baseContentUrl": "https://github.com/xxh3898/money-timer/blob/main/extensions/vscode",
@@ -45,7 +55,8 @@
   },
   "scripts": {
     "dev": "code --extensionDevelopmentPath=.",
-    "package": "vsce package"
+    "test": "node --test test/extension.test.cjs",
+    "package": "vsce package --no-dependencies --out money-timer-0.3.1.vsix"
   },
   "devDependencies": {
     "@vscode/vsce": "^2.15.0"

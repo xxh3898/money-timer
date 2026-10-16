@@ -179,6 +179,16 @@ function updateStatusBar() {
   statusItem.show();
 }
 
+function updatePosition() {
+  const position = vscode.workspace.getConfiguration("moneyTimer").get("position", "right");
+  const alignment = position === "left" ? vscode.StatusBarAlignment.Left : vscode.StatusBarAlignment.Right;
+  if (!statusItem || statusItem.alignment !== alignment) {
+    if (statusItem) statusItem.dispose();
+    statusItem = vscode.window.createStatusBarItem(alignment, 100);
+  }
+  updateStatusBar();
+}
+
 async function promptQuickPick(title, items, current) {
   const picked = await vscode.window.showQuickPick(items, { title, placeHolder: `현재: ${current}` });
   return picked || current;
@@ -440,8 +450,11 @@ async function activate(context) {
       await context.globalState.update(SETTINGS_KEY, migratedSettings);
     }
   }
-  statusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-  context.subscriptions.push(statusItem);
+  updatePosition();
+  context.subscriptions.push({ dispose: () => { if (statusItem) statusItem.dispose(); statusItem = undefined; } });
+  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((event) => {
+    if (event.affectsConfiguration("moneyTimer.position")) updatePosition();
+  }));
   context.subscriptions.push(vscode.commands.registerCommand("moneyTimer.configure", configure));
   context.subscriptions.push(vscode.commands.registerCommand("moneyTimer.toggleVisibility", toggleVisibility));
   context.subscriptions.push(vscode.commands.registerCommand("moneyTimer.showDetails", showDetails));
@@ -455,6 +468,8 @@ async function activate(context) {
 
 function deactivate() {
   if (timer) clearInterval(timer);
+  if (statusItem) statusItem.dispose();
+  statusItem = undefined;
 }
 
 module.exports = { activate, deactivate };
